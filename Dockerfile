@@ -38,7 +38,7 @@ COPY --from=builder /app/dist ./dist
 COPY prisma ./prisma
 
 # Expor porta
-EXPOSE 5000
+EXPOSE 3000
 
 # Usar dumb-init para iniciar a aplicação
 ENTRYPOINT ["dumb-init", "--"]
