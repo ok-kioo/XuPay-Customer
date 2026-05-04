@@ -95,7 +95,7 @@ export class ResponseParser {
   ): GetCustomerPayload {
     return {
       kind: "GET_CUSTOMER_PAYLOAD",
-      document: payload.document,
+      id: payload.id,
     };
   }
 

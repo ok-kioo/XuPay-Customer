@@ -15,68 +15,114 @@ export class CustomerService {
     if (existingCustomer) {
       return ErrorHandler.handle("Cliente com este documento já existe",socket);
     }
-    await this.customerRepository.create({ name, document });
+    const customer = await this.customerRepository.create({ name, document });
+
+    const payload = 'id=' + customer.id + ',name=' + customer.name + ',document=' + customer.document + ',balance=' + customer.balance.toString()+',createdAt=' + customer.createdAt.toISOString();
+
+    const response = ResponseParser.serialize({
+            method: "POST",
+            path: "customer-create",
+            body: {
+                source: "SERVICE",
+                type: "RESPONSE",
+                payload: payload,
+                timestamp: new Date().toISOString()
+            }
+        });
+
+        socket.write(response);
+        socket.end();
   }
 
-  public async updateCustomer(id: string,name: string | undefined,
-    document: string | undefined,
-    balance: Prisma.Decimal | undefined,
-    socket: Socket): Promise<void> {
+  public async updateCustomer(
+  id: string,
+  name: string | undefined,
+  document: string | undefined,
+  balance: Prisma.Decimal | undefined,
+  socket: Socket
+): Promise<void> {
+  if (!id) {
+    return ErrorHandler.handle(
+      "ID do cliente é obrigatório para atualização",
+      socket
+    );
+  }
 
-    if (!id) {
-      return ErrorHandler.handle("ID do cliente é obrigatório para atualização",socket);
+  const existingCustomer = await this.customerRepository.findById(id);
+
+  if (!existingCustomer) {
+    return ErrorHandler.handle(
+      "Cliente com este ID não encontrado",
+      socket
+    );
+  }
+
+  const dataToUpdate: {
+    name?: string;
+    document?: string;
+    balance?: Prisma.Decimal;
+  } = {};
+
+  if (name !== undefined) {
+    if (name.trim() === "") {
+      return ErrorHandler.handle("Nome não pode ser vazio", socket);
     }
 
-    const existingCustomer = await this.customerRepository.findById(id);
+    dataToUpdate.name = name;
+  }
 
-    if (!existingCustomer) {
-      return ErrorHandler.handle("Cliente com este ID não encontrado",socket);
+  if (document !== undefined) {
+    if (document.trim() === "") {
+      return ErrorHandler.handle("Documento não pode ser vazio", socket);
     }
 
-    const dataToUpdate: {
-      name?: string;
-      document?: string;
-      balance?: Prisma.Decimal;
-    } = {};
+    const customerWithSameDocument =
+      await this.customerRepository.findByDocument(document);
 
-    if (name !== undefined) {
-      if (name.trim() === "") {
-        return ErrorHandler.handle("Nome não pode ser vazio", socket);
-      }
-
-      dataToUpdate.name = name;
-    }
-
-    if (document !== undefined) {
-      if (document.trim() === "") {
-        return ErrorHandler.handle("Documento não pode ser vazio", socket);
-      }
-
-      const customerWithSameDocument =
-        await this.customerRepository.findByDocument(document);
-
-      if (customerWithSameDocument && customerWithSameDocument.id !== id) {
-        return ErrorHandler.handle("Outro cliente com este documento já existe",socket);
-      }
-
-      dataToUpdate.document = document;
-    }
-
-    if (balance !== undefined) {
-      if (balance.isNegative()) {
-        return ErrorHandler.handle("Saldo não pode ser negativo", socket);
-      }
-
-      dataToUpdate.balance = balance;
-    }
-
-    if (Object.keys(dataToUpdate).length === 0) {
-      return ErrorHandler.handle("Nenhum campo válido enviado para atualização",socket
+    if (customerWithSameDocument && customerWithSameDocument.id !== id) {
+      return ErrorHandler.handle(
+        "Outro cliente com este documento já existe",
+        socket
       );
     }
 
-    await this.customerRepository.update(id, dataToUpdate);
+    dataToUpdate.document = document;
   }
+
+  if (balance !== undefined) {
+    if (balance.isNegative()) {
+      return ErrorHandler.handle("Saldo não pode ser negativo", socket);
+    }
+
+    dataToUpdate.balance = existingCustomer.balance.plus(balance);
+  }
+
+  if (Object.keys(dataToUpdate).length === 0) {
+    return ErrorHandler.handle(
+      "Nenhum campo válido enviado para atualização",
+      socket
+    );
+  }
+
+  const updatedCustomer = await this.customerRepository.update(id, dataToUpdate);
+
+  const payload = 'id=' + updatedCustomer.id + ',name=' + updatedCustomer.name + ',document=' + updatedCustomer.document + ',balance=' + updatedCustomer.balance.toString()+',createdAt=' + updatedCustomer.createdAt.toISOString();
+
+  const response = ResponseParser.serialize({
+            method: "PUT",
+            path: "customer-update",
+            body: {
+                source: "SERVICE",
+                type: "RESPONSE",
+                payload: payload,
+                timestamp: new Date().toISOString()
+            }
+        });
+
+        socket.write(response);
+        socket.end();
+  }
+
 
   public async deleteCustomer(id: string, socket: Socket): Promise<void> {
     if (!id) {
@@ -92,16 +138,16 @@ export class CustomerService {
     await this.customerRepository.delete(id);
   }
 
-  public async getCustomer(document: string, socket: Socket): Promise<void> {
-    if (!document) {
-      return ErrorHandler.handle("Documento do cliente é obrigatório para consulta",socket
+  public async getCustomer(id: string, socket: Socket): Promise<void> {
+    if (!id) {
+      return ErrorHandler.handle("ID do cliente é obrigatório para consulta",socket
       );
     }
 
-    const customer = await this.customerRepository.findByDocument(document);
+    const customer = await this.customerRepository.findById(id);
 
     if (!customer) {
-      return ErrorHandler.handle("Cliente com este documento não encontrado",socket);
+      return ErrorHandler.handle("Cliente com este ID não encontrado",socket);
     }
 
     const payload = 'id=' + customer.id + ',name=' + customer.name + ',document=' + customer.document + ',balance=' + customer.balance.toString()+',createdAt=' + customer.createdAt.toISOString();
@@ -119,6 +165,5 @@ export class CustomerService {
 
         socket.write(response);
         socket.end();
-
   }
 }

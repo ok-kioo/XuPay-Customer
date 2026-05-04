@@ -66,7 +66,7 @@ export class CustomerController {
             return ErrorHandler.handle('Payload inválido para obtenção de cliente', socket);
         }
 
-        this.customerService.getCustomer(messageBody.payload.document, socket);
+        this.customerService.getCustomer(messageBody.payload.id, socket);
     }
 
 }
