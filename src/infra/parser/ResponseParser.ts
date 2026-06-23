@@ -179,7 +179,7 @@ export class ResponseParser {
       id: this.requiredString(payload.id, "id"),
       name: this.optionalString(payload.name),
       document: this.optionalString(payload.document),
-      balance: payload.balance !== undefined ? new Prisma.Decimal(this.requiredString(payload.balance, "balance")) : undefined,
+      balance: new Prisma.Decimal(this.requiredString(payload.balance, "balance"))
     };
   }
 
