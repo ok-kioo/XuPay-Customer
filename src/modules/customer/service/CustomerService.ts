@@ -15,23 +15,20 @@ export class CustomerService {
     if (existingCustomer) {
       return ErrorHandler.handle("Cliente com este documento já existe",socket);
     }
+
     const customer = await this.customerRepository.create({ name, document });
 
-    const payload = 'id=' + customer.id + ',name=' + customer.name + ',document=' + customer.document + ',balance=' + customer.balance.toString()+',createdAt=' + customer.createdAt.toISOString();
+    const responseBody = {
+      id: customer.id,
+      name: customer.name,
+      document: customer.document,
+      balance: customer.balance.toString(),
+      createdAt: customer.createdAt.toISOString(),
+    };
 
-    const response = ResponseParser.serialize({
-            method: "POST",
-            path: "customer-create",
-            body: {
-                source: "SERVICE",
-                type: "RESPONSE",
-                payload: payload,
-                timestamp: new Date().toISOString()
-            }
-        });
-
-        socket.write(response);
-        socket.end();
+    const response = ResponseParser.serializeResponse(201, responseBody);
+    socket.write(response);
+    socket.end();
   }
 
   public async updateCustomer(
@@ -106,21 +103,17 @@ export class CustomerService {
 
   const updatedCustomer = await this.customerRepository.update(id, dataToUpdate);
 
-  const payload = 'id=' + updatedCustomer.id + ',name=' + updatedCustomer.name + ',document=' + updatedCustomer.document + ',balance=' + updatedCustomer.balance.toString()+',createdAt=' + updatedCustomer.createdAt.toISOString();
+  const responseBody = {
+      id: updatedCustomer.id,
+      name: updatedCustomer.name,
+      document: updatedCustomer.document,
+      balance: updatedCustomer.balance.toString(),
+      createdAt: updatedCustomer.createdAt.toISOString(),
+    };
 
-  const response = ResponseParser.serialize({
-            method: "PUT",
-            path: "customer-update",
-            body: {
-                source: "SERVICE",
-                type: "RESPONSE",
-                payload: payload,
-                timestamp: new Date().toISOString()
-            }
-        });
-
-        socket.write(response);
-        socket.end();
+    const response = ResponseParser.serializeResponse(200, responseBody);
+    socket.write(response);
+    socket.end();
   }
 
 
@@ -136,6 +129,10 @@ export class CustomerService {
     }
 
     await this.customerRepository.delete(id);
+
+    const response = ResponseParser.serializeResponse(204, {});
+    socket.write(response);
+    socket.end();
   }
 
   public async getCustomer(id: string, socket: Socket): Promise<void> {
@@ -150,20 +147,16 @@ export class CustomerService {
       return ErrorHandler.handle("Cliente com este ID não encontrado",socket);
     }
 
-    const payload = 'id=' + customer.id + ',name=' + customer.name + ',document=' + customer.document + ',balance=' + customer.balance.toString()+',createdAt=' + customer.createdAt.toISOString();
+    const responseBody = {
+      id: customer.id,
+      name: customer.name,
+      document: customer.document,
+      balance: customer.balance.toString(),
+      createdAt: customer.createdAt.toISOString(),
+    };
 
-    const response = ResponseParser.serialize({
-            method: "GET",
-            path: "customer",
-            body: {
-                source: "SERVICE",
-                type: "RESPONSE",
-                payload: payload,
-                timestamp: new Date().toISOString()
-            }
-        });
-
-        socket.write(response);
-        socket.end();
+    const response = ResponseParser.serializeResponse(200, responseBody);
+    socket.write(response);
+    socket.end();
   }
 }

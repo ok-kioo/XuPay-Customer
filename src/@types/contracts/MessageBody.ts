@@ -1,7 +1,7 @@
-import { UpdateCustomerPayload } from "./UpdateCustomerPayload";
-import { DeleteCustomerPayload } from "./DeleteCustomerPayload";
-import { CreateCustomerPayload } from "./CreateCustomerPayload";
-import { GetCustomerPayload } from "./GetCustomerPayload";
+import { UpdateCustomerPayload } from "./payload/UpdateCustomerPayload";
+import { DeleteCustomerPayload } from "./payload/DeleteCustomerPayload";
+import { CreateCustomerPayload } from "./payload/CreateCustomerPayload";
+import { GetCustomerPayload } from "./payload/GetCustomerPayload";
 
 export type Payload =
 | UpdateCustomerPayload
@@ -10,8 +10,5 @@ export type Payload =
 | GetCustomerPayload;
 
 export type MessageBody = {
-    source: string;
-    type: string;
     payload: Payload;
-    timestamp: string;
 };

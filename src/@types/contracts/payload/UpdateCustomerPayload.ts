@@ -1,5 +1,5 @@
 import { Prisma } from "@/infra/database/generated/client";
-import { PayloadBase } from "./PayloadBase";
+import { PayloadBase } from "../PayloadBase";
 
 export type UpdateCustomerPayload = PayloadBase & {
   kind: "UPDATE_CUSTOMER_PAYLOAD";

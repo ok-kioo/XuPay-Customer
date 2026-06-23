@@ -1,4 +1,4 @@
-import { PayloadBase } from "./PayloadBase";
+import { PayloadBase } from "../PayloadBase";
 
 export type GetCustomerPayload = PayloadBase & {
     kind: "GET_CUSTOMER_PAYLOAD";

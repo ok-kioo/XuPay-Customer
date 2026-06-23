@@ -1,4 +1,4 @@
-import { PayloadBase } from "./PayloadBase";
+import { PayloadBase } from "../PayloadBase";
 
 export type DeleteCustomerPayload = PayloadBase & {
     kind: "DELETE_CUSTOMER_PAYLOAD";

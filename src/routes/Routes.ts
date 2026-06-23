@@ -18,16 +18,16 @@ export class Routes {
     }
 
     public handle(request: Request, socket: Socket): void {
-        if (request.path === "customer-create" && request.method === "POST") {
+        if (request.path === "create" && request.method === "POST") {
             this.customerController.createCustomer(request, socket);
         }
-        else if (request.path === "customer-update" && request.method === "PUT") {
+        else if (request.path === "update" && request.method === "PUT") {
             this.customerController.updateCustomer(request, socket);
         }
-        else if (request.path === "customer-delete" && request.method === "DELETE") {
+        else if (request.path === "delete" && request.method === "DELETE") {
             this.customerController.deleteCustomer(request, socket);
         }
-        else if (request.path === "customer" && request.method === "GET") {
+        else if (request.path === "" && request.method === "GET") {
             this.customerController.getCustomer(request, socket);
         }
         else {
