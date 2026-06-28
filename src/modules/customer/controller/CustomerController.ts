@@ -1,7 +1,6 @@
 import { CreateCustomerPayload } from '@/@types/contracts/payload/CreateCustomerPayload';
 import { CustomerService } from '../service/CustomerService';
 import { isValidRequest, Request } from '@/@types/contracts/Request';
-import { ErrorHandler } from '@/infra/middleware/Error';
 import { UpdateCustomerPayload } from '@/@types/contracts/payload/UpdateCustomerPayload';
 import { DeleteCustomerPayload } from '@/@types/contracts/payload/DeleteCustomerPayload';
 import { GetCustomerPayload } from '@/@types/contracts/payload/GetCustomerPayload';
@@ -15,7 +14,7 @@ export class CustomerController {
         const validRequest = isValidRequest(request, socket);
 
         if (!validRequest){
-            return ErrorHandler.handle('Corpo da requisição inválido', socket);
+            return;
         }
 
         const payload = request.body.payload;
@@ -29,7 +28,7 @@ export class CustomerController {
         const validRequest = isValidRequest(request, socket);
 
         if (!validRequest){
-            return ErrorHandler.handle('Corpo da requisição inválido', socket);
+            return;
         }
 
         const payload = request.body.payload;
@@ -47,7 +46,7 @@ export class CustomerController {
         const validRequest = isValidRequest(request, socket);
 
         if (!validRequest){
-            return ErrorHandler.handle('Corpo da requisição inválido', socket);
+            return;
         }
 
         const payload = request.body.payload;
@@ -61,7 +60,7 @@ export class CustomerController {
         const validRequest = isValidRequest(request, socket);
 
         if (!validRequest){
-            return ErrorHandler.handle('Corpo da requisição inválido', socket);
+            return;
         }
 
         const payload = request.body.payload;
