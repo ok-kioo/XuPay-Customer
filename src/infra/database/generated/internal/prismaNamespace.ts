@@ -522,6 +522,8 @@ export const CustomerScalarFieldEnum = {
   name: 'name',
   document: 'document',
   balance: 'balance',
+  pixKey: 'pixKey',
+  city: 'city',
   apiToken: 'apiToken',
   createdAt: 'createdAt'
 } as const

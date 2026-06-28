@@ -20,9 +20,9 @@ export class CustomerController {
 
         const payload = request.body.payload;
 
-        const {  name, document } = payload as CreateCustomerPayload;
+        const {  name, document, pixKey, city } = payload as CreateCustomerPayload;
 
-        this.customerService.createCustomer(name, document, socket);
+        this.customerService.createCustomer(name, document, pixKey, city, socket);
     }
 
     public updateCustomer(request: Request, socket: any): void {
@@ -34,13 +34,11 @@ export class CustomerController {
 
         const payload = request.body.payload;
 
-        const { id, name, document, balance } = payload as UpdateCustomerPayload;
+        const { id, name, document, balance, pixKey, city } = payload as UpdateCustomerPayload;
 
         this.customerService.updateCustomer(
             id,
-            name,
-            document,
-            balance,
+            { name, document, balance, pixKey, city },
             socket
         );
     }

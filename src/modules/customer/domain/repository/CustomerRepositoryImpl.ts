@@ -9,7 +9,9 @@ export class CustomerRepositoryImpl implements ICustomerRepository {
         const createdCustomer = await prisma.customer.create({
             data: {
                 name: customer.name,
-                document: customer.document
+                document: customer.document,
+                pixKey: customer.pixKey,
+                city: customer.city
             }
         });
         return createdCustomer;

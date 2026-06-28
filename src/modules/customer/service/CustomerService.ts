@@ -5,10 +5,19 @@ import { Prisma } from "@/infra/database/generated/client";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
 import crypto from "crypto";
 
+type UpdateCustomerData = {
+  name?: string;
+  document?: string;
+  balance?: Prisma.Decimal;
+  pixKey?: string;
+  city?: string;
+  apiToken?: string;
+};
+
 export class CustomerService {
   constructor(private readonly customerRepository: ICustomerRepository) {}
 
-  public async createCustomer(name: string,document: string,socket: Socket): Promise<void> {if (!name || !document) {
+  public async createCustomer(name: string,document: string, pixKey: string, city: string,socket: Socket): Promise<void> {if (!name || !document) {
       return ErrorHandler.handle("Dados incompletos para criação do cliente",socket);
     }
     const existingCustomer = await this.customerRepository.findByDocument(document);
@@ -17,11 +26,11 @@ export class CustomerService {
       return ErrorHandler.handle("Cliente com este documento já existe",socket);
     }
 
-    const customer = await this.customerRepository.create({ name, document });
+    const customer = await this.customerRepository.create({ name, document, pixKey, city });
 
     const apiToken = this.generateApiToken(customer.id);
 
-    await this.updateCustomer(customer.id, undefined, undefined, undefined, apiToken, socket);
+    await this.updateCustomer(customer.id, {apiToken}, socket);
 
     const responseBody = {
       id: customer.id,
@@ -39,10 +48,7 @@ export class CustomerService {
 
   public async updateCustomer(
   id: string,
-  name: string | undefined,
-  document: string | undefined,
-  balance: Prisma.Decimal | undefined,
-  apiToken: string | undefined,
+  data: UpdateCustomerData,
   socket: Socket
 ): Promise<void> {
   if (!id) {
@@ -51,6 +57,15 @@ export class CustomerService {
       socket
     );
   }
+
+  const {
+    name,
+    document,
+    balance,
+    pixKey,
+    city,
+    apiToken,
+  } = data;
 
   const existingCustomer = await this.customerRepository.findById(id);
 
@@ -66,6 +81,8 @@ export class CustomerService {
     document?: string;
     balance?: Prisma.Decimal;
     apiToken?: string;
+    pixKey?: string;
+    city?: string;
   } = {};
 
   if (name !== undefined) {
@@ -100,6 +117,14 @@ export class CustomerService {
     }
 
     dataToUpdate.balance = existingCustomer.balance.plus(balance);
+  }
+
+  if (pixKey !== undefined) {
+    dataToUpdate.pixKey = pixKey;
+  }
+
+  if (city !== undefined) {
+    dataToUpdate.city = city;
   }
 
   if (apiToken !== undefined) {

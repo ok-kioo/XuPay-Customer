@@ -7,5 +7,7 @@ export type UpdateCustomerPayload = PayloadBase & {
   name?: string;
   document?: string;
   balance?: Prisma.Decimal;
+  pixKey?: string;
+  city?: string;
   
 };

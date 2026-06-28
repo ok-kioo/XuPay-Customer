@@ -168,6 +168,8 @@ export class ResponseParser {
       kind: "CREATE_CUSTOMER_PAYLOAD",
       name: this.requiredString(payload.name, "name"),
       document: this.requiredString(payload.document, "document"),
+      pixKey: this.requiredString(payload.pixKey, "pixKey"),
+      city: this.requiredString(payload.city, "city"),
     };
   }
 
@@ -179,7 +181,9 @@ export class ResponseParser {
       id: this.requiredString(payload.id, "id"),
       name: this.optionalString(payload.name),
       document: this.optionalString(payload.document),
-      balance: new Prisma.Decimal(this.requiredString(payload.balance, "balance"))
+      balance: new Prisma.Decimal(this.requiredString(payload.balance, "balance")),
+      pixKey: this.optionalString(payload.pixKey),
+      city: this.optionalString(payload.city),
     };
   }
 
