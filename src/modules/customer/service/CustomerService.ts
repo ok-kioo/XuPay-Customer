@@ -3,7 +3,7 @@ import { ICustomerRepository } from "../domain/repository/ICustomerRepository";
 import { ErrorHandler } from "@/infra/middleware/Error";
 import { Prisma } from "@/infra/database/generated/client";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
-import crypto from "crypto";
+import { generateApiToken } from "@/infra/provider/encrypt/encrypt";
 
 type UpdateCustomerData = {
   name?: string;
@@ -28,7 +28,7 @@ export class CustomerService {
 
     const customer = await this.customerRepository.create({ name, document, pixKey, city });
 
-    const apiToken = this.generateApiToken(customer.id);
+    const apiToken = generateApiToken( { id: customer.id } );
 
     await this.updateCustomer(customer.id, {apiToken}, socket);
 
@@ -195,26 +195,5 @@ export class CustomerService {
     const response = ResponseParser.serializeResponse(200, responseBody);
     socket.write(response);
     socket.end();
-  }
-
-  private generateApiToken(id: string): string {
-    const key = Buffer.from(
-      process.env.SECRET_API_TOKEN_KEY!,
-      "hex"
-    );
-
-    const iv = crypto.randomBytes(16);
-
-    const cipher = crypto.createCipheriv(
-      "aes-256-cbc",
-      key,
-      iv
-    );
-
-    const encrypted =
-      cipher.update(id, "utf8", "hex") +
-      cipher.final("hex");
-
-    return `${iv.toString("hex")}:${encrypted}`;
   }
 }
