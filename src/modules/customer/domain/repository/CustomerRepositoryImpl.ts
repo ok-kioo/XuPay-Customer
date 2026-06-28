@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client/extension";
 
 export class CustomerRepositoryImpl implements ICustomerRepository {
  
-    public async create(customer: Omit<Customer, "id" | "createdAt" | "balance">): Promise<Customer> {
+    public async create(customer: Omit<Customer, "id" | "createdAt" | "balance" | "apiToken" >): Promise<Customer> {
         const prisma = new PrismaClient();
         const createdCustomer = await prisma.customer.create({
             data: {

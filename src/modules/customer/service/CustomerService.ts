@@ -3,6 +3,7 @@ import { ICustomerRepository } from "../domain/repository/ICustomerRepository";
 import { ErrorHandler } from "@/infra/middleware/Error";
 import { Prisma } from "@/infra/database/generated/client";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
+import crypto from "crypto";
 
 export class CustomerService {
   constructor(private readonly customerRepository: ICustomerRepository) {}
@@ -18,11 +19,16 @@ export class CustomerService {
 
     const customer = await this.customerRepository.create({ name, document });
 
+    const apiToken = this.generateApiToken(customer.id);
+
+    await this.updateCustomer(customer.id, undefined, undefined, undefined, apiToken, socket);
+
     const responseBody = {
       id: customer.id,
       name: customer.name,
       document: customer.document,
       balance: customer.balance.toString(),
+      apiToken,
       createdAt: customer.createdAt.toISOString(),
     };
 
@@ -36,6 +42,7 @@ export class CustomerService {
   name: string | undefined,
   document: string | undefined,
   balance: Prisma.Decimal | undefined,
+  apiToken: string | undefined,
   socket: Socket
 ): Promise<void> {
   if (!id) {
@@ -58,6 +65,7 @@ export class CustomerService {
     name?: string;
     document?: string;
     balance?: Prisma.Decimal;
+    apiToken?: string;
   } = {};
 
   if (name !== undefined) {
@@ -92,6 +100,10 @@ export class CustomerService {
     }
 
     dataToUpdate.balance = existingCustomer.balance.plus(balance);
+  }
+
+  if (apiToken !== undefined) {
+    dataToUpdate.apiToken = apiToken;
   }
 
   if (Object.keys(dataToUpdate).length === 0) {
@@ -158,5 +170,26 @@ export class CustomerService {
     const response = ResponseParser.serializeResponse(200, responseBody);
     socket.write(response);
     socket.end();
+  }
+
+  private generateApiToken(id: string): string {
+    const key = Buffer.from(
+      process.env.SECRET_API_TOKEN_KEY!,
+      "hex"
+    );
+
+    const iv = crypto.randomBytes(16);
+
+    const cipher = crypto.createCipheriv(
+      "aes-256-cbc",
+      key,
+      iv
+    );
+
+    const encrypted =
+      cipher.update(id, "utf8", "hex") +
+      cipher.final("hex");
+
+    return `${iv.toString("hex")}:${encrypted}`;
   }
 }

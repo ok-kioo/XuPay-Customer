@@ -75,6 +75,7 @@ export const CustomerScalarFieldEnum = {
   name: 'name',
   document: 'document',
   balance: 'balance',
+  apiToken: 'apiToken',
   createdAt: 'createdAt'
 } as const
 
