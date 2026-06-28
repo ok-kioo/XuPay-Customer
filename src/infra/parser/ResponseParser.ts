@@ -181,7 +181,7 @@ export class ResponseParser {
       id: this.requiredString(payload.id, "id"),
       name: this.optionalString(payload.name),
       document: this.optionalString(payload.document),
-      balance: new Prisma.Decimal(this.requiredString(payload.balance, "balance")),
+      balance: this.optionalDecimal(payload.balance),
       pixKey: this.optionalString(payload.pixKey),
       city: this.optionalString(payload.city),
     };
@@ -198,6 +198,22 @@ export class ResponseParser {
 
   private static optionalString(value: JsonValue | undefined): string | undefined {
     return typeof value === "string" ? value : undefined;
+  }
+
+  private static optionalDecimal(
+    value: JsonValue | undefined
+  ): Prisma.Decimal | undefined {
+    if (typeof value === "string") {
+      const normalized = value.trim();
+
+      return normalized ? new Prisma.Decimal(normalized) : undefined;
+    }
+
+    if (typeof value === "number") {
+      return new Prisma.Decimal(value);
+    }
+
+    return undefined;
   }
 
   private static requiredString(
