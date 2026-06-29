@@ -1,6 +1,6 @@
 import { Socket } from "net";
 import { ICustomerRepository } from "../domain/repository/ICustomerRepository";
-import { ErrorHandler } from "@/infra/middleware/Error";
+import { ErrorHandler } from "@/infra/middleware/error/TcpError";
 import { Prisma } from "@/infra/database/generated/client";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
 import { generateApiToken } from "@/infra/provider/encrypt/encrypt";

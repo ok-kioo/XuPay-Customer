@@ -1,8 +1,8 @@
 import {
   createRequestSignature,
   normalizePath,
-} from "@/@types/contracts/Request";
-import type { Request, RequestHeaders } from "@/@types/contracts/Request";
+} from "@/@types/contracts/TcpRequest";
+import type { Request, RequestHeaders } from "@/@types/contracts/TcpRequest";
 import type { CreateCustomerPayload } from "@/@types/contracts/payload/CreateCustomerPayload";
 import type { GetCustomerPayload } from "@/@types/contracts/payload/GetCustomerPayload";
 import type { UpdateCustomerPayload } from "@/@types/contracts/payload/UpdateCustomerPayload";
@@ -12,6 +12,7 @@ import type { JsonValue } from "@/@types/contracts/JsonValue";
 import { JsonCodec } from "./JsonCodec";
 import type { JsonObject } from "./JsonCodec";
 import { Prisma } from "@/infra/database/generated/client";
+import { HealthPayload } from "@/@types/contracts/payload/HealthPayload";
 
 
 type ParsedPayload =
@@ -19,6 +20,7 @@ type ParsedPayload =
   | GetCustomerPayload
   | UpdateCustomerPayload
   | DeleteCustomerPayload
+  | HealthPayload;
 
 type SerializableRequest = {
   method: string;
@@ -139,6 +141,10 @@ export class ResponseParser {
       return this.parseDeletePayload(payload);
     }
 
+    if (path === "health") {
+      return this.parseHealthPayload(payload);
+    }
+
     return this.parseGetPayload(payload);
   }
 
@@ -150,6 +156,14 @@ export class ResponseParser {
     }
 
     return body;
+  }
+
+  private static parseHealthPayload(
+    payload: JsonObject
+  ): HealthPayload {
+    return {
+      kind: "HEALTH_PAYLOAD",
+    };
   }
 
   private static parseGetPayload(

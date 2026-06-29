@@ -1,11 +1,11 @@
 import { Socket } from "net";
-import type { Request } from "../@types/contracts/Request";
-import { ErrorHandler } from "../infra/middleware/Error";
+import type { Request } from "../@types/contracts/TcpRequest";
+import { ErrorHandler } from "../infra/middleware/error/TcpError";
 import { CustomerService } from "@/modules/customer/service/CustomerService";
 import { CustomerController } from "@/modules/customer/controller/CustomerController";
 import { CustomerRepositoryImpl } from "@/modules/customer/domain/repository/CustomerRepositoryImpl";
 
-export class Routes {
+export class TcpRoutes {
     private readonly customerRepository: CustomerRepositoryImpl;
     private readonly customerService: CustomerService;
     private readonly customerController: CustomerController;
