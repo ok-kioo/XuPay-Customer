@@ -8,6 +8,8 @@ import { generateApiToken } from "@/infra/provider/encrypt/encrypt";
 type UpdateCustomerData = {
   name?: string;
   document?: string;
+  email?: string;
+  password?: string;
   balance?: Prisma.Decimal;
   pixKey?: string;
   city?: string;
@@ -17,7 +19,7 @@ type UpdateCustomerData = {
 export class CustomerService {
   constructor(private readonly customerRepository: ICustomerRepository) {}
 
-  public async createCustomer(name: string,document: string, pixKey: string, city: string,socket: Socket): Promise<void> {if (!name || !document) {
+  public async createCustomer(name: string,document: string, email: string, password: string, pixKey: string, city: string,socket: Socket): Promise<void> {if (!name || !document || !email || !password) {
       return ErrorHandler.handle("Dados incompletos para criação do cliente",socket);
     }
     const existingCustomer = await this.customerRepository.findByDocument(document);
@@ -26,7 +28,13 @@ export class CustomerService {
       return ErrorHandler.handle("Cliente com este documento já existe",socket);
     }
 
-    const customer = await this.customerRepository.create({ name, document, pixKey, city });
+    const existingCustomerByEmail = await this.customerRepository.findByEmail(email);
+      
+    if (existingCustomerByEmail) {
+      return ErrorHandler.handle("Cliente com este email já existe", socket);
+    }
+
+    const customer = await this.customerRepository.create({ name, document, email, password, pixKey, city });
 
     const apiToken = generateApiToken( { id: customer.id } );
 
@@ -36,6 +44,7 @@ export class CustomerService {
       id: customer.id,
       name: customer.name,
       document: customer.document,
+      email: customer.email,
       balance: customer.balance.toString(),
       apiToken,
       createdAt: customer.createdAt.toISOString(),
@@ -61,6 +70,8 @@ export class CustomerService {
   const {
     name,
     document,
+    email,
+    password,
     balance,
     pixKey,
     city,
@@ -79,6 +90,8 @@ export class CustomerService {
   const dataToUpdate: {
     name?: string;
     document?: string;
+    email?: string;
+    password?: string;
     balance?: Prisma.Decimal;
     apiToken?: string;
     pixKey?: string;
@@ -109,6 +122,24 @@ export class CustomerService {
     }
 
     dataToUpdate.document = document;
+  }
+
+    if (email !== undefined) {
+    if (email.trim() === "") {
+      return ErrorHandler.handle("Email não pode ser vazio", socket);
+    }
+    const customerWithSameEmail = await this.customerRepository.findByEmail(email);
+    if (customerWithSameEmail && customerWithSameEmail.id !== id) {
+      return ErrorHandler.handle("Outro cliente com este email já existe", socket);
+    }
+    dataToUpdate.email = email;
+  }
+
+  if (password !== undefined) {
+    if (password.trim() === "") {
+      return ErrorHandler.handle("Senha não pode ser vazia", socket);
+    }
+    dataToUpdate.password = password;
   }
 
   if (balance !== undefined) {
@@ -144,6 +175,7 @@ export class CustomerService {
       id: updatedCustomer.id,
       name: updatedCustomer.name,
       document: updatedCustomer.document,
+      email: updatedCustomer.email,
       balance: updatedCustomer.balance.toString(),
       createdAt: updatedCustomer.createdAt.toISOString(),
     };
@@ -188,6 +220,7 @@ export class CustomerService {
       id: customer.id,
       name: customer.name,
       document: customer.document,
+      email: customer.email,
       balance: customer.balance.toString(),
       createdAt: customer.createdAt.toISOString(),
     };

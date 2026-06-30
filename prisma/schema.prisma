@@ -15,8 +15,10 @@ datasource db {
 model Customer {
   id         String   @id @default(uuid())
   name       String 
-  document   String  @unique
-  balance    Decimal @default(0) @db.Decimal(14, 2)
+  document   String   @unique
+  email      String   @unique
+  password   String
+  balance    Decimal  @default(0) @db.Decimal(14, 2)
   pixKey     String
   city       String
   apiToken   String?

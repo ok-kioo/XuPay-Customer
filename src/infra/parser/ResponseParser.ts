@@ -182,6 +182,8 @@ export class ResponseParser {
       kind: "CREATE_CUSTOMER_PAYLOAD",
       name: this.requiredString(payload.name, "name"),
       document: this.requiredString(payload.document, "document"),
+      email: this.requiredString(payload.email, "email"),
+      password: this.requiredString(payload.password, "password"),
       pixKey: this.requiredString(payload.pixKey, "pixKey"),
       city: this.requiredString(payload.city, "city"),
     };
@@ -195,6 +197,8 @@ export class ResponseParser {
       id: this.requiredString(payload.id, "id"),
       name: this.optionalString(payload.name),
       document: this.optionalString(payload.document),
+      email: this.optionalString(payload.email),
+      password: this.optionalString(payload.password),
       balance: this.optionalDecimal(payload.balance),
       pixKey: this.optionalString(payload.pixKey),
       city: this.optionalString(payload.city),
