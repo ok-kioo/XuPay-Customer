@@ -19,13 +19,19 @@ type UpdateCustomerData = {
 export class CustomerService {
   constructor(private readonly customerRepository: ICustomerRepository) {}
 
-  public async createCustomer(name: string,document: string, email: string, password: string, pixKey: string, city: string,socket: Socket): Promise<void> {if (!name || !document) {
+  public async createCustomer(name: string,document: string, email: string, password: string, pixKey: string, city: string, socket: Socket): Promise<void> {if (!name || !document) {
       return ErrorHandler.handle("Dados incompletos para criação do cliente",socket);
     }
-    const existingCustomer = await this.customerRepository.findByDocument(document);
+    const existingCustomerByDocument = await this.customerRepository.findByDocument(document);
 
-    if (existingCustomer) {
+    if (existingCustomerByDocument) {
       return ErrorHandler.handle("Cliente com este documento já existe",socket);
+    }
+
+    const existingCustomerByEmail = await this.customerRepository.findByEmail(email);
+
+    if (existingCustomerByEmail) {
+      return ErrorHandler.handle("Cliente com este email já existe",socket);
     }
 
     const customer = await this.customerRepository.create({ name, document, email, password, pixKey, city });
@@ -216,6 +222,31 @@ export class CustomerService {
 
     if (!customer) {
       return ErrorHandler.handle("Cliente com este ID não encontrado",socket);
+    }
+
+    const responseBody = {
+      id: customer.id,
+      name: customer.name,
+      document: customer.document,
+      email: customer.email,
+      balance: customer.balance.toString(),
+      createdAt: customer.createdAt.toISOString(),
+    };
+
+    const response = ResponseParser.serializeResponse(200, responseBody);
+    socket.write(response);
+    socket.end();
+  }
+
+  public async auth(email: string, password: string, socket: Socket): Promise<void> {
+    if (!email || !password) {
+      return ErrorHandler.handle("Email e senha são obrigatórios para autenticação", socket);
+    }
+
+    const customer = await this.customerRepository.findByEmail(email);
+
+    if (!customer) {
+      return ErrorHandler.handle("Cliente com este email não encontrado",socket);
     }
 
     const responseBody = {
