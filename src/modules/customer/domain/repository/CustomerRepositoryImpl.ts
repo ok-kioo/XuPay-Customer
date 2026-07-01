@@ -1,15 +1,16 @@
 import { Customer } from "../entity/Customer";
 import { ICustomerRepository } from "./ICustomerRepository";
-import { PrismaClient } from "@prisma/client/extension";
+import { prismaClient } from "@/infra/database/prismaClient";
 
 export class CustomerRepositoryImpl implements ICustomerRepository {
  
     public async create(customer: Omit<Customer, "id" | "createdAt" | "balance" | "apiToken" >): Promise<Customer> {
-        const prisma = new PrismaClient();
-        const createdCustomer = await prisma.customer.create({
+        const createdCustomer = await prismaClient.customer.create({
             data: {
                 name: customer.name,
                 document: customer.document,
+                email: customer.email,
+                password: customer.password,
                 pixKey: customer.pixKey,
                 city: customer.city
             }
@@ -18,8 +19,7 @@ export class CustomerRepositoryImpl implements ICustomerRepository {
     }
 
     public async update(id: string, data: any): Promise<Customer> {
-        const prisma = new PrismaClient();
-        const customer = await prisma.customer.update({
+        const customer = await prismaClient.customer.update({
             where: {
                 id: id
             },
@@ -29,18 +29,15 @@ export class CustomerRepositoryImpl implements ICustomerRepository {
     }
 
     public async delete(id: string): Promise<void> {
-        const prisma = new PrismaClient();
-        await prisma.customer.delete({
+        await prismaClient.customer.delete({
             where: {
                 id: id
             }
         });
     }
 
-    public async findById(id: string): Promise<Customer> {
-        const prisma = new PrismaClient();
-
-        const customer = await prisma.customer.findUnique({
+    public async findById(id: string): Promise<Customer | null> {
+        const customer = await prismaClient.customer.findUnique({
             where: {
                 id: id
             }
@@ -49,9 +46,8 @@ export class CustomerRepositoryImpl implements ICustomerRepository {
         return customer;
     }
 
-    public async findByDocument(document: string): Promise<Customer> {
-        const prisma = new PrismaClient();
-        const customer = await prisma.customer.findUnique({
+    public async findByDocument(document: string): Promise<Customer | null> {
+        const customer = await prismaClient.customer.findUnique({
             where: {
                 document: document
             }
@@ -59,4 +55,12 @@ export class CustomerRepositoryImpl implements ICustomerRepository {
         return customer;
     }
 
+    public async findByEmail(email: string): Promise<Customer | null> {
+        const customer = await prismaClient.customer.findUnique({
+            where: {
+                email: email
+            }
+        });
+        return customer;
+    }
 }

@@ -4,6 +4,8 @@ export type CreateCustomerPayload = PayloadBase & {
   kind: "CREATE_CUSTOMER_PAYLOAD";
   name: string;
   document: string;
+  email: string;
+  password: string;
   pixKey: string;
   city: string;
 };

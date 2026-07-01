@@ -521,6 +521,8 @@ export const CustomerScalarFieldEnum = {
   id: 'id',
   name: 'name',
   document: 'document',
+  email: 'email',
+  password: 'password',
   balance: 'balance',
   pixKey: 'pixKey',
   city: 'city',
@@ -545,6 +547,14 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
 
