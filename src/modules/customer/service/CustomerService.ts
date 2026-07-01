@@ -30,7 +30,7 @@ export class CustomerService {
 
     const apiToken = generateApiToken( { id: customer.id } );
 
-    await this.updateCustomer(customer.id, {apiToken}, socket);
+    await this.updateCustomer(customer.id, {apiToken}, '', socket);
 
     const responseBody = {
       id: customer.id,
@@ -49,6 +49,7 @@ export class CustomerService {
   public async updateCustomer(
   id: string,
   data: UpdateCustomerData,
+  service: string,
   socket: Socket
 ): Promise<void> {
   if (!id) {
@@ -112,6 +113,11 @@ export class CustomerService {
   }
 
   if (balance !== undefined) {
+
+    if (service !== process.env.XUPAY_TRANSACTION_SERVICE_NAME) {
+      return ErrorHandler.handle("Atualização de saldo somente permitida pelo serviço de transações", socket);
+    }
+
     if (balance.isNegative()) {
       return ErrorHandler.handle("Saldo não pode ser negativo", socket);
     }

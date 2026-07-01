@@ -38,6 +38,7 @@ export class CustomerController {
         this.customerService.updateCustomer(
             id,
             { name, document, balance, pixKey, city },
+            request.origin?.service || "unknown",
             socket
         );
     }
