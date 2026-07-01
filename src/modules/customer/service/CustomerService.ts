@@ -4,6 +4,7 @@ import { ErrorHandler } from "@/infra/middleware/error/TcpError";
 import { Prisma } from "@/infra/database/generated/client";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
 import { generateApiToken } from "@/infra/provider/encrypt/encrypt";
+import { hashPassword } from "@/infra/provider/hash/hash";
 
 type UpdateCustomerData = {
   name?: string;
@@ -35,9 +36,18 @@ export class CustomerService {
       return ErrorHandler.handle("Cliente com este email já existe", socket);
     }
 
+    const hashedPassword = await hashPassword(password);
+
     let customer;
     try {
-      customer = await this.customerRepository.create({ name, document, email, password, pixKey, city });
+      customer = await this.customerRepository.create({ 
+        name, 
+        document, 
+        email, 
+        password: hashedPassword, // ← hash salvo no banco
+        pixKey, 
+        city 
+      });
     } catch (err: any) {
       if (err.code === "P2002") {
         return ErrorHandler.handle("Cliente com este email ou documento já existe", socket);
