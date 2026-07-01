@@ -22,17 +22,32 @@ export class CustomerService {
   public async createCustomer(name: string,document: string, email: string, password: string, pixKey: string, city: string,socket: Socket): Promise<void> {if (!name || !document) {
       return ErrorHandler.handle("Dados incompletos para criação do cliente",socket);
     }
+
     const existingCustomer = await this.customerRepository.findByDocument(document);
 
     if (existingCustomer) {
-      return ErrorHandler.handle("Cliente com este documento já existe",socket);
+      return ErrorHandler.handle("Cliente com este documento já existe", socket);
     }
 
-    const customer = await this.customerRepository.create({ name, document, email, password, pixKey, city });
+    const existingByEmail = await this.customerRepository.findByEmail(email);
+
+    if (existingByEmail) {
+      return ErrorHandler.handle("Cliente com este email já existe", socket);
+    }
+
+    let customer;
+    try {
+      customer = await this.customerRepository.create({ name, document, email, password, pixKey, city });
+    } catch (err: any) {
+      if (err.code === "P2002") {
+        return ErrorHandler.handle("Cliente com este email ou documento já existe", socket);
+      }
+      return ErrorHandler.handle("Erro ao criar cliente", socket);
+    }
 
     const apiToken = generateApiToken( { id: customer.id } );
 
-    await this.updateCustomer(customer.id, {apiToken}, socket);
+    await this.customerRepository.update(customer.id, { apiToken });
 
     const responseBody = {
       id: customer.id,

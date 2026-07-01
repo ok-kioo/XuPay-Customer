@@ -44,7 +44,7 @@ export class DNSServiceClient {
       body: {
         ip: process.env.XUPAY_SERVICE_HOST || "",
         domain: process.env.XUPAY_SERVICE_DOMAIN || "",
-        port: "3500"
+        port: "3000"
       },
     });
   }
