@@ -4,6 +4,7 @@ import { ErrorHandler } from "@/infra/middleware/error/TcpError";
 import { Prisma } from "@/infra/database/generated/client";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
 import { generateApiToken } from "@/infra/provider/encrypt/encrypt";
+import { hashPassword } from "@/infra/provider/hash/hash";
 
 type UpdateCustomerData = {
   name?: string;
@@ -40,7 +41,9 @@ export class CustomerService {
       return ErrorHandler.handle("Cliente com este email já existe", socket);
     }
 
-    const customer = await this.customerRepository.create({ name, document, email, password, pixKey, city });
+    const hashedPassword = await hashPassword(password);
+
+    const customer = await this.customerRepository.create({ name, document, email, password: hashedPassword, pixKey, city });
 
     const apiToken = generateApiToken( { id: customer.id } );
 
@@ -255,7 +258,11 @@ export class CustomerService {
       return ErrorHandler.handle("Cliente com este email não encontrado",socket);
     }
 
-    
+    const hashedPassword = await hashPassword(password);
+
+    if(hashedPassword !== customer.password){
+      return ErrorHandler.handle("Senha incorreta", socket);
+    }
 
     const responseBody = {
       id: customer.id,
