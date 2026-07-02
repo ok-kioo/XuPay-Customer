@@ -7,6 +7,7 @@ import type { CreateCustomerPayload } from "@/@types/contracts/payload/CreateCus
 import type { GetCustomerPayload } from "@/@types/contracts/payload/GetCustomerPayload";
 import type { UpdateCustomerPayload } from "@/@types/contracts/payload/UpdateCustomerPayload";
 import type { DeleteCustomerPayload } from "@/@types/contracts/payload/DeleteCustomerPayload";
+import type { LoginPayload } from "@/@types/contracts/payload/LoginPayload";
 
 import type { JsonValue } from "@/@types/contracts/JsonValue";
 import { JsonCodec } from "./JsonCodec";
@@ -20,7 +21,8 @@ type ParsedPayload =
   | GetCustomerPayload
   | UpdateCustomerPayload
   | DeleteCustomerPayload
-  | HealthPayload;
+  | HealthPayload
+  | LoginPayload;
 
 type SerializableRequest = {
   method: string;
@@ -145,6 +147,10 @@ export class ResponseParser {
       return this.parseHealthPayload(payload);
     }
 
+    if (path === "login") {
+      return this.parseLoginPayload(payload);
+    }
+
     return this.parseGetPayload(payload);
   }
 
@@ -163,6 +169,16 @@ export class ResponseParser {
   ): HealthPayload {
     return {
       kind: "HEALTH_PAYLOAD",
+    };
+  }
+
+  private static parseLoginPayload(
+    payload: JsonObject
+  ): LoginPayload {
+    return {
+      kind: "LOGIN_PAYLOAD",
+      email: this.requiredString(payload.email, "email"),
+      password: this.requiredString(payload.password, "password"),
     };
   }
 

@@ -4,6 +4,7 @@ import { isValidRequest, Request } from '@/@types/contracts/TcpRequest';
 import { UpdateCustomerPayload } from '@/@types/contracts/payload/UpdateCustomerPayload';
 import { DeleteCustomerPayload } from '@/@types/contracts/payload/DeleteCustomerPayload';
 import { GetCustomerPayload } from '@/@types/contracts/payload/GetCustomerPayload';
+import { LoginPayload } from '@/@types/contracts/payload/LoginPayload';
 
 export class CustomerController {
     constructor(
@@ -68,6 +69,20 @@ export class CustomerController {
         const { id } = payload as GetCustomerPayload;
 
         this.customerService.getCustomer(id, socket);
+    }
+
+    public login(request: Request, socket: any): void {
+        const validRequest = isValidRequest(request, socket);
+        
+        if (!validRequest){
+            return;
+        }
+
+        const payload = request.body.payload;
+
+        const { email, password } = payload as LoginPayload;
+        
+        this.customerService.auth(email, password, socket);
     }
 
 }

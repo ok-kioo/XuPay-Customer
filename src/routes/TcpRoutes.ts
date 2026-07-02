@@ -30,6 +30,9 @@ export class TcpRoutes {
         else if (request.path === "" && request.method === "GET") {
             this.customerController.getCustomer(request, socket);
         }
+        else if (request.path === "login" && request.method === "POST") {
+            this.customerController.login(request, socket);
+        }
         else {
             return ErrorHandler.handle('Rota não encontrada', socket);
         }
