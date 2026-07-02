@@ -7,7 +7,8 @@ enum CustomerEvents {
     CREATE_CUSTOMER = "/create",
     UPDATE_CUSTOMER = "/update",
     GET_CUSTOMER = "",
-    DELETE_CUSTOMER = "/delete"
+    DELETE_CUSTOMER = "/delete",
+    LOGIN_CUSTOMER = "/login"
 }
 
 export class CustomerWorker {

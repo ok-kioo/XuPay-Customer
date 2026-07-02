@@ -4,7 +4,7 @@ import { ErrorHandler } from "@/infra/middleware/error/TcpError";
 import { Prisma } from "@/infra/database/generated/client";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
 import { generateApiToken } from "@/infra/provider/encrypt/encrypt";
-import { hashPassword } from "@/infra/provider/hash/hash";
+import { hashPassword, verifyPassword } from "@/infra/provider/hash/hash";
 
 type UpdateCustomerData = {
   name?: string;
@@ -33,12 +33,6 @@ export class CustomerService {
 
     if (existingCustomerByEmail) {
       return ErrorHandler.handle("Cliente com este email já existe",socket);
-    }
-
-    const existingByEmail = await this.customerRepository.findByEmail(email);
-
-    if (existingByEmail) {
-      return ErrorHandler.handle("Cliente com este email já existe", socket);
     }
 
     const hashedPassword = await hashPassword(password);
@@ -156,7 +150,7 @@ export class CustomerService {
       return ErrorHandler.handle("Senha não pode ser vazia", socket);
     }
 
-    dataToUpdate.password = password;
+    dataToUpdate.password = await hashPassword(password);
   }
 
   if (balance !== undefined) {
@@ -258,9 +252,9 @@ export class CustomerService {
       return ErrorHandler.handle("Cliente com este email não encontrado",socket);
     }
 
-    const hashedPassword = await hashPassword(password);
+    const isPasswordValid = await verifyPassword(password, customer.password);
 
-    if(hashedPassword !== customer.password){
+    if (!isPasswordValid) {
       return ErrorHandler.handle("Senha incorreta", socket);
     }
 
