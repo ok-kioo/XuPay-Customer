@@ -10,12 +10,14 @@ export class UdpSocketClient {
         reject(new Error("Response timeout"));
       }, 3000);
 
-      client.send(message, port, host, (err) => {
-        if (err) {
-          clearTimeout(timeout);
-          client.close();
-          reject(err);
-        }
+      client.bind(0, () => {
+        client.send(message, port, host, (err) => {
+          if (err) {
+            clearTimeout(timeout);
+            client.close();
+            reject(err);
+          }
+        });
       });
 
       client.once("message", (msg) => {

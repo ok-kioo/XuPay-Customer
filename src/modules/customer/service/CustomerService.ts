@@ -34,11 +34,17 @@ export class CustomerService {
       return ErrorHandler.handle("Cliente com este email já existe",socket);
     }
 
+    const existingByEmail = await this.customerRepository.findByEmail(email);
+
+    if (existingByEmail) {
+      return ErrorHandler.handle("Cliente com este email já existe", socket);
+    }
+
     const customer = await this.customerRepository.create({ name, document, email, password, pixKey, city });
 
     const apiToken = generateApiToken( { id: customer.id } );
 
-    await this.updateCustomer(customer.id, {apiToken}, socket);
+    await this.customerRepository.update(customer.id, { apiToken });
 
     const responseBody = {
       id: customer.id,
@@ -249,11 +255,14 @@ export class CustomerService {
       return ErrorHandler.handle("Cliente com este email não encontrado",socket);
     }
 
+    
+
     const responseBody = {
       id: customer.id,
       name: customer.name,
       document: customer.document,
       email: customer.email,
+      apiToken: customer.apiToken,
       balance: customer.balance.toString(),
       createdAt: customer.createdAt.toISOString(),
     };
